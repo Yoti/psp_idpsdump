@@ -10,6 +10,9 @@ PSP_HEAP_SIZE_KB(1024);
 #include "../regedit_prx/regedit.h"
 #define printf pspDebugScreenPrintf
 
+#define key_number 0x0100 // 100/120, 101/121
+#define key_offset 0x0038 // 100@38, 100@f0, 100@1a8, 101@60, 101@118
+
 SceCtrlData pad;
 
 void ExitCross(char*text)
@@ -44,41 +47,16 @@ int WriteFile(char*file, void*buf, int size)
 	return written;
 }
 
-int pspSdkLoadStartModule_Smart(const char*file)
-{
-	SceUID module_file;
-	u8 module_type = 0;
-
-	module_file = sceIoOpen(file, PSP_O_RDONLY, 0777);
-	if (module_file >= 0)
-	{
-		sceIoLseek(module_file, 0x7C, PSP_SEEK_SET);
-		sceIoRead(module_file, &module_type, 1);
-		sceIoClose(module_file);
-
-		if (module_type == 0x02)
-			return pspSdkLoadStartModule(file, PSP_MEMORY_PARTITION_KERNEL);
-		else if (module_type == 0x04)
-			return pspSdkLoadStartModule(file, PSP_MEMORY_PARTITION_USER);
-		else
-			return -2; // неизвестный тип
-	}
-	else
-		sceIoClose(module_file);
-
-	return -1; // нет файла
-}
-
 int main(int argc, char*argv[])
 {
 	int i = 0;
 	int paranoid = 0;
-	char key101[256];
-	char idps101[16];
-	unsigned char char101[1];
-	unsigned char char101_1[1];
-	unsigned char char101_2[1];
-	/*unsigned*/ char text101[32] = "";
+	char key_buffer[512];
+	char idps_buffer[16];
+	unsigned char idps_text_char_temp[1];
+	unsigned char idps_text_char_1st[1];
+	unsigned char idps_text_char_2nd[1];
+	char idps_text_buffer[32] = "";
 
 	sceKernelDelayThread(10000);
 	sceCtrlReadBufferPositive(&pad, 1);
@@ -88,51 +66,55 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("Welcome to IDPS Dumper v0.3 by Yoti\n\n");
+	printf("PSP IDPS Dumper v0.3f by Yoti\n\n");
 
-	SceUID mod = pspSdkLoadStartModule_Smart("regedit.prx");
+	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
 		ExitError("Error: LoadStart() returned 0x%08x\n", 3, mod);
 
-	ReadKey(0x101, key101);
+	ReadKey(key_number, key_buffer);
 
 	printf(" Your IDPS is: ");
 	if (paranoid == 1)
 	{
-		printf("h1dd3n!\n");
+		for (i=key_offset; i<key_offset+0x08; i++)
+			printf("%02X", (u8)key_buffer[i]);
+		for (i=key_offset; i<key_offset+0x08; i++)
+			printf("XX");
+		printf("\n");		
 	}
 	else
 	{
-		for (i=0x60; i<0x60+0x10; i++)
-			printf("%02X", (u8)key101[i]);
+		for (i=key_offset; i<key_offset+0x10; i++)
+			printf("%02X", (u8)key_buffer[i]);
 		printf("\n");
 	}
 
 	// binary
-	for (i=0x60; i<0x60+0x10; i++)
-		idps101[i-0x60]=key101[i];
-	WriteFile("ms0:/idps.bin", idps101, 16);
+	for (i=key_offset; i<key_offset+0x10; i++)
+		idps_buffer[i-key_offset]=key_buffer[i];
+	WriteFile("ms0:/idps.bin", idps_buffer, 16);
 
 	// text
-	for (i=0x60; i<0x60+0x10; i++)
+	for (i=key_offset; i<key_offset+0x10; i++)
 	{
-		char101[1]=key101[i];
-		char101_1[1]=(char101[1] & 0xf0) >> 4;
-		char101_2[1]=(char101[1] & 0x0f);
+		idps_text_char_temp[1]=key_buffer[i];
+		idps_text_char_1st[1]=(idps_text_char_temp[1] & 0xf0) >> 4;
+		idps_text_char_2nd[1]=(idps_text_char_temp[1] & 0x0f);
 
 		// 1st half of byte
-		if (char101_1[1] < 0xA) // digit
-			sprintf(text101, "%s%c", text101, char101_1[1]+0x30);
+		if (idps_text_char_1st[1] < 0xA) // digit
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_1st[1]+0x30);
 		else // char
-			sprintf(text101, "%s%c", text101, char101_1[1]+0x37);
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_1st[1]+0x37);
 
 		// 2nd half of byte
-		if (char101_2[1] < 0xA) // digit
-			sprintf(text101, "%s%c", text101, char101_2[1]+0x30);
+		if (idps_text_char_2nd[1] < 0xA) // digit
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_2nd[1]+0x30);
 		else // char
-			sprintf(text101, "%s%c", text101, char101_2[1]+0x37);
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_2nd[1]+0x37);
 	}
-	WriteFile("ms0:/idps.txt", text101, 32);
+	WriteFile("ms0:/idps.txt", idps_text_buffer, 32);
 
 	ExitCross("\nDone");
 	return 0;
