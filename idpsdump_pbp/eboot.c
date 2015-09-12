@@ -1,16 +1,17 @@
 #include <pspsdk.h>
 #include <pspkernel.h>
 #include <stdio.h> // sprintf()
+#include <pspctrl.h> // sceCtrl*()
 
-PSP_MODULE_INFO("idpsdump", 0, 0, 2);
+PSP_MODULE_INFO("idpsdump", 0, 0, 3);
 PSP_MAIN_THREAD_ATTR(0);
-PSP_HEAP_SIZE_KB(20480);
+PSP_HEAP_SIZE_KB(1024);
 
 #include "../regedit_prx/regedit.h"
 #define printf pspDebugScreenPrintf
 
-#include <pspctrl.h>
 SceCtrlData pad;
+
 void ExitCross(char*text)
 {
 	printf("%s, press X to exit...\n", text);
@@ -74,6 +75,10 @@ int main(int argc, char*argv[])
 	int paranoid = 0;
 	char key101[256];
 	char idps101[16];
+	unsigned char char101[1];
+	unsigned char char101_1[1];
+	unsigned char char101_2[1];
+	/*unsigned*/ char text101[32] = "";
 
 	sceKernelDelayThread(10000);
 	sceCtrlReadBufferPositive(&pad, 1);
@@ -83,13 +88,14 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("Welcome to IdpsDump!\n\n");
+	printf("Welcome to IDPS Dumper v0.3 by Yoti\n\n");
 
 	SceUID mod = pspSdkLoadStartModule_Smart("regedit.prx");
 	if (mod < 0)
 		ExitError("Error: LoadStart() returned 0x%08x\n", 3, mod);
 
 	ReadKey(0x101, key101);
+
 	printf(" Your IDPS is: ");
 	if (paranoid == 1)
 	{
@@ -102,9 +108,31 @@ int main(int argc, char*argv[])
 		printf("\n");
 	}
 
+	// binary
 	for (i=0x60; i<0x60+0x10; i++)
 		idps101[i-0x60]=key101[i];
 	WriteFile("ms0:/idps.bin", idps101, 16);
+
+	// text
+	for (i=0x60; i<0x60+0x10; i++)
+	{
+		char101[1]=key101[i];
+		char101_1[1]=(char101[1] & 0xf0) >> 4;
+		char101_2[1]=(char101[1] & 0x0f);
+
+		// 1st half of byte
+		if (char101_1[1] < 0xA) // digit
+			sprintf(text101, "%s%c", text101, char101_1[1]+0x30);
+		else // char
+			sprintf(text101, "%s%c", text101, char101_1[1]+0x37);
+
+		// 2nd half of byte
+		if (char101_2[1] < 0xA) // digit
+			sprintf(text101, "%s%c", text101, char101_2[1]+0x30);
+		else // char
+			sprintf(text101, "%s%c", text101, char101_2[1]+0x37);
+	}
+	WriteFile("ms0:/idps.txt", text101, 32);
 
 	ExitCross("\nDone");
 	return 0;
