@@ -91,12 +91,14 @@ int main(int argc, char*argv[])
 	if (mod < 0)
 		ExitError("Error: LoadStart() returned 0x%08x\n", 3, mod);
 
+	ReadKey(0x101, key101);
 	printf(" Your IDPS is: ");
 	if (paranoid == 1)
+	{
 		printf("h1dd3n!\n");
+	}
 	else
 	{
-		ReadKey(0x101, key101);
 		for (i=0x60; i<0x60+0x10; i++)
 			printf("%02X", key101[i]);
 		printf("\n");
