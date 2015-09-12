@@ -2,11 +2,9 @@
 #include <pspkernel.h>
 #include <stdio.h> // sprintf()
 
-PSP_MODULE_INFO("idpsdump", 0, 0, 1);
+PSP_MODULE_INFO("idpsdump", 0, 0, 2);
 PSP_MAIN_THREAD_ATTR(0);
 PSP_HEAP_SIZE_KB(20480);
-
-//#define DEBUG
 
 #include "../regedit_prx/regedit.h"
 #define printf pspDebugScreenPrintf
@@ -100,7 +98,7 @@ int main(int argc, char*argv[])
 	else
 	{
 		for (i=0x60; i<0x60+0x10; i++)
-			printf("%02X", key101[i]);
+			printf("%02X", (u8)key101[i]);
 		printf("\n");
 	}
 
