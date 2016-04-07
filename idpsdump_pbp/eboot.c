@@ -3,7 +3,7 @@
 #include <stdio.h> // sprintf()
 #include <pspctrl.h> // sceCtrl*()
 
-PSP_MODULE_INFO("idpsdump", 0, 0, 3);
+PSP_MODULE_INFO("idpsdump", 0, 0, 4);
 PSP_MAIN_THREAD_ATTR(0);
 PSP_HEAP_SIZE_KB(1024);
 
@@ -66,7 +66,7 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("PSP IDPS Dumper v0.3f by Yoti\n\n");
+	printf("PSP IDPS Dumper v0.4 by Yoti\n\n");
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
@@ -81,14 +81,107 @@ int main(int argc, char*argv[])
 			printf("%02X", (u8)key_buffer[i]);
 		for (i=key_offset; i<key_offset+0x08; i++)
 			printf("XX");
-		printf("\n");		
 	}
 	else
 	{
 		for (i=key_offset; i<key_offset+0x10; i++)
 			printf("%02X", (u8)key_buffer[i]);
-		printf("\n");
 	}
+	printf("\n\n");
+
+	printf(" It seems that you are using ");
+	if (key_buffer[key_offset+0x04] == 0x00)
+		printf("PlayStation Portable");
+	else if (key_buffer[key_offset+0x04] == 0x01)
+		printf("PlayStation Vita"); // нет инфы по TV
+	else
+		printf("UNKNOWN_%2C model", key_buffer[key_offset+0x04]);
+	printf("\n");
+
+	if (key_buffer[key_offset+0x04] == 0x00) // только для PSP
+	{
+		printf(" Your motherboard is ");
+		switch(key_buffer[key_offset+0x07])
+		{
+			case 0x01:
+				printf("TA-079/081");
+				break;
+			case 0x02:
+				printf("TA-082/086");
+				break;
+			case 0x03:
+				printf("TA-085/088");
+				break;
+			case 0x04:
+				printf("TA-090v2/092");
+				break;
+			case 0x05:
+				printf("TA-091");
+				break;
+			case 0x06:
+				printf("TA-093");
+				break;
+			// нет инфы по 0x07
+			case 0x08:
+				printf("TA-095/095v2");
+				break;
+			case 0x09:
+				printf("TA-096"); // нет инфы по 097
+				break;
+			default:
+				printf("UNKNOWN_%2C", key_buffer[key_offset+0x07]);
+				break;
+		}
+	}
+	else // PSV/TV
+	{
+		printf(" Your motherboard is UNKNOWN_%2C", key_buffer[key_offset+0x07]);
+	}
+	printf("\n");
+
+	printf(" And your region is ");
+	switch(key_buffer[key_offset+0x05])
+	{
+		case 0x03:
+			printf("Japan");
+			break;
+		case 0x04:
+			printf("North America");
+			break;
+		case 0x05:
+			printf("Europe/East/Africa");
+			break;
+		case 0x06:
+			printf("Korea");
+			break;
+		case 0x07:
+			printf("Great Britain/United Kingdom");
+			break;
+		case 0x08:
+			printf("Mexica/Latin America");
+			break;
+		case 0x09:
+			printf("Australia/New Zeland");
+			break;
+		case 0x0A:
+			printf("Hong Kong/Singapore");
+			break;
+		case 0x0B:
+			printf("Taiwan");
+			break;
+		case 0x0C:
+			printf("Russia");
+			break;
+		case 0x0D:
+			printf("China");
+			break;
+		default:
+			printf("UNKNOWN_%2C", key_buffer[key_offset+0x05]);
+			break;
+	}
+	printf("\n\n");
+
+	printf(" IF YOU SEE ANY UNKNOWN VALUES PLZ CONTACT WITH ME VIA TWITTER\n");
 
 	// binary
 	for (i=key_offset; i<key_offset+0x10; i++)
