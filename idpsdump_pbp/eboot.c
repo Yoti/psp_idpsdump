@@ -3,7 +3,10 @@
 #include <stdio.h> // sprintf()
 #include <pspctrl.h> // sceCtrl*()
 
-PSP_MODULE_INFO("idpsdump", 0, 0, 4);
+#define VER_MAJOR 0
+#define VER_MINOR 5
+
+PSP_MODULE_INFO("idpsdump", 0, VER_MAJOR, VER_MINOR);
 PSP_MAIN_THREAD_ATTR(0);
 PSP_HEAP_SIZE_KB(1024);
 
@@ -66,7 +69,7 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("PSP IDPS Dumper v0.4 by Yoti\n\n");
+	printf("PSP IDPS Dumper v%i.%i by Yoti\n\n", VER_MAJOR, VER_MINOR);
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
@@ -93,49 +96,50 @@ int main(int argc, char*argv[])
 	if (key_buffer[key_offset+0x04] == 0x00)
 		printf("PlayStation Portable");
 	else if (key_buffer[key_offset+0x04] == 0x01)
-		printf("PlayStation Vita"); // нет инфы по TV
+		printf("PlayStation Vita");
 	else
-		printf("UNKNOWN_%2C model", key_buffer[key_offset+0x04]);
+		printf("UNKNOWN_%02X model", key_buffer[key_offset+0x04]); // нет инфы по VTE-XXXX
 	printf("\n");
 
-	if (key_buffer[key_offset+0x04] == 0x00) // только для PSP
+	printf(" Your motherboard is ");
+	switch(key_buffer[key_offset+0x07])
 	{
-		printf(" Your motherboard is ");
-		switch(key_buffer[key_offset+0x07])
-		{
-			case 0x01:
-				printf("TA-079/081");
-				break;
-			case 0x02:
-				printf("TA-082/086");
-				break;
-			case 0x03:
-				printf("TA-085/088");
-				break;
-			case 0x04:
-				printf("TA-090v2/092");
-				break;
-			case 0x05:
-				printf("TA-091");
-				break;
-			case 0x06:
-				printf("TA-093");
-				break;
-			// нет инфы по 0x07
-			case 0x08:
-				printf("TA-095/095v2");
-				break;
-			case 0x09:
-				printf("TA-096"); // нет инфы по 097
-				break;
-			default:
-				printf("UNKNOWN_%2C", key_buffer[key_offset+0x07]);
-				break;
-		}
-	}
-	else // PSV/TV
-	{
-		printf(" Your motherboard is UNKNOWN_%2C", key_buffer[key_offset+0x07]);
+		case 0x01:
+			printf("TA-079/081"); // VTE-XXXX ???
+			break;
+		case 0x02:
+			printf("TA-082/086");
+			break;
+		case 0x03:
+			printf("TA-085/088");
+			break;
+		case 0x04:
+			printf("TA-090v2/092");
+			break;
+		case 0x05:
+			printf("TA-091");
+			break;
+		case 0x06:
+			printf("TA-093");
+			break;
+		//case 0x07:
+		//	printf("???");
+		//	break;
+		case 0x08:
+			printf("TA-095/095v2");
+			break;
+		case 0x09:
+			printf("TA-096/097");
+			break;
+		case 0x10:
+			printf("PCH-1000"); // IRS-002
+			break;
+		case 0x14:
+			printf("PCH-2000"); // USS-1001
+			break;
+		default:
+			printf("UNKNOWN_%02X", key_buffer[key_offset+0x07]); // VTE-XXXX
+			break;
 	}
 	printf("\n");
 
@@ -154,7 +158,7 @@ int main(int argc, char*argv[])
 		case 0x06:
 			printf("Korea");
 			break;
-		case 0x07:
+		case 0x07: // PCH-xx03 VTE-1016
 			printf("Great Britain/United Kingdom");
 			break;
 		case 0x08:
@@ -176,12 +180,12 @@ int main(int argc, char*argv[])
 			printf("China");
 			break;
 		default:
-			printf("UNKNOWN_%2C", key_buffer[key_offset+0x05]);
+			printf("UNKNOWN_%02X", key_buffer[key_offset+0x05]);
 			break;
 	}
 	printf("\n\n");
 
-	printf(" IF YOU SEE ANY UNKNOWN VALUES PLZ CONTACT WITH ME VIA TWITTER\n");
+	printf(" IF YOU SEE ANY UNKNOWN VALUES PLZ CONTACT WITH ME\n");
 
 	// binary
 	for (i=key_offset; i<key_offset+0x10; i++)
@@ -197,15 +201,15 @@ int main(int argc, char*argv[])
 
 		// 1st half of byte
 		if (idps_text_char_1st[1] < 0xA) // digit
-			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_1st[1]+0x30);
+			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_1st[1]+0x30);
 		else // char
-			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_1st[1]+0x37);
+			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_1st[1]+0x37);
 
 		// 2nd half of byte
 		if (idps_text_char_2nd[1] < 0xA) // digit
-			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_2nd[1]+0x30);
+			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_2nd[1]+0x30);
 		else // char
-			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_2nd[1]+0x37);
+			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_2nd[1]+0x37);
 	}
 	WriteFile("ms0:/idps.txt", idps_text_buffer, 32);
 
