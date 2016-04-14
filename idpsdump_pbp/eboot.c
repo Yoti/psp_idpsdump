@@ -96,16 +96,16 @@ int main(int argc, char*argv[])
 	if (key_buffer[key_offset+0x04] == 0x00)
 		printf("PlayStation Portable");
 	else if (key_buffer[key_offset+0x04] == 0x01)
-		printf("PlayStation Vita");
+		printf("PlayStation Vita"); // old, 3g, slim...
 	else
-		printf("UNKNOWN_%02X model", key_buffer[key_offset+0x04]); // нет инфы по VTE-XXXX
+		printf("UNKNOWN_%02X model", key_buffer[key_offset+0x04]); // нет инфы по VTE-XXXX/DOL-1001
 	printf("\n");
 
 	printf(" Your motherboard is ");
 	switch(key_buffer[key_offset+0x07])
 	{
 		case 0x01:
-			printf("TA-079/081"); // VTE-XXXX ???
+			printf("TA-079/081"); // также DOL-1001???
 			break;
 		case 0x02:
 			printf("TA-082/086");
@@ -132,10 +132,10 @@ int main(int argc, char*argv[])
 			printf("TA-096/097");
 			break;
 		case 0x10:
-			printf("PCH-1000"); // IRS-002
+			printf("IRS-002 (PCH-1000)");
 			break;
 		case 0x14:
-			printf("PCH-2000"); // USS-1001
+			printf("USS-1001 (PCH-2000)");
 			break;
 		default:
 			printf("UNKNOWN_%02X", key_buffer[key_offset+0x07]); // VTE-XXXX
