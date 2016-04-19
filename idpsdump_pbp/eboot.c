@@ -105,31 +105,31 @@ int main(int argc, char*argv[])
 	switch(key_buffer[key_offset+0x07])
 	{
 		case 0x01:
-			printf("TA-079/081"); // также DOL-1001???
+			printf("TA-079/081 (PSP-1000)"); // также DOL-1001???
 			break;
 		case 0x02:
-			printf("TA-082/086");
+			printf("TA-082/086 (PSP-1000)");
 			break;
 		case 0x03:
-			printf("TA-085/088");
+			printf("TA-085/088 (PSP-2000)");
 			break;
 		case 0x04:
-			printf("TA-090v2/092");
+			printf("TA-090v2/092 (PSP-3000)");
 			break;
 		case 0x05:
-			printf("TA-091");
+			printf("TA-091 (PSP-N1000)");
 			break;
 		case 0x06:
-			printf("TA-093");
+			printf("TA-093 (PSP-3000)");
 			break;
 		//case 0x07:
 		//	printf("???");
 		//	break;
 		case 0x08:
-			printf("TA-095/095v2");
+			printf("TA-095/095v2 (PSP-3000)");
 			break;
 		case 0x09:
-			printf("TA-096/097");
+			printf("TA-096/097 (PSP-E1000)");
 			break;
 		case 0x10:
 			printf("IRS-002 (PCH-1000)");

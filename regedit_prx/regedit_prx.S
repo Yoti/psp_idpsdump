@@ -1,0 +1,11 @@
+	.set noreorder
+
+#include "pspstub.s"
+
+	STUB_START "regedit_prx",0x40090000,0x00050005
+	STUB_FUNC  0xD36C12B7,Scramble
+	STUB_FUNC  0x22B10138,NewKey
+	STUB_FUNC  0xBE861F44,ReadKey
+	STUB_FUNC  0x5E4510CC,WriteKey
+	STUB_FUNC  0x3E808F59,DeleteKey
+	STUB_END
