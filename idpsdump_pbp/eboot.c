@@ -16,6 +16,13 @@ PSP_HEAP_SIZE_KB(1024);
 #define key_number 0x0100 // 100/120, 101/121
 #define key_offset 0x0038 // 100@38, 100@f0, 100@1a8, 101@60, 101@118
 
+/*
+	Model: Fat, SKU: PCH-1000, MoBo: IRS-002;
+	Model: Fat3G, SKU: PCH-1100, MoBo: IRS-002 (?);
+	Model: Slim, SKU: PCH-2000, MoBo: USS-1001;
+	Model: TV, SKU: VTE-1000, MoBo: DOL-1001.
+*/
+
 SceCtrlData pad;
 
 void ExitCross(char*text)
@@ -56,7 +63,7 @@ int main(int argc, char*argv[])
 	int paranoid = 0;
 	char key_buffer[512];
 	char idps_buffer[16];
-	unsigned char idps_text_char_temp[1];
+	unsigned char idps_text_char_tmp[1];
 	unsigned char idps_text_char_1st[1];
 	unsigned char idps_text_char_2nd[1];
 	char idps_text_buffer[32] = "";
@@ -95,52 +102,76 @@ int main(int argc, char*argv[])
 	printf(" It seems that you are using ");
 	if (key_buffer[key_offset+0x04] == 0x00)
 		printf("PlayStation Portable");
-	else if (key_buffer[key_offset+0x04] == 0x01)
-		printf("PlayStation Vita"); // old, 3g, slim...
+	else if (key_buffer[key_offset+0x04] == 0x01) // psv, vtv
+	{
+		if (key_buffer[key_offset+0x06] == 0x00)
+			printf("PlayStation Vita"); // fat, fat3g, slim
+		else if (key_buffer[key_offset+0x06] == 0x02)
+			printf("PlayStation/Vita TV"); // vtv, pstv
+		else
+			printf("Unknown Vita 0x%02X", key_buffer[key_offset+0x06]);
+	}
 	else
-		printf("UNKNOWN_%02X model", key_buffer[key_offset+0x04]); // нет инфы по VTE-XXXX/DOL-1001
+		printf("Unknown PS 0x%02X", key_buffer[key_offset+0x04]);
 	printf("\n");
 
 	printf(" Your motherboard is ");
-	switch(key_buffer[key_offset+0x07])
+	if (key_buffer[key_offset+0x06] == 0x00) // portable
 	{
-		case 0x01:
-			printf("TA-079/081 (PSP-1000)"); // также DOL-1001???
-			break;
-		case 0x02:
-			printf("TA-082/086 (PSP-1000)");
-			break;
-		case 0x03:
-			printf("TA-085/088 (PSP-2000)");
-			break;
-		case 0x04:
-			printf("TA-090v2/092 (PSP-3000)");
-			break;
-		case 0x05:
-			printf("TA-091 (PSP-N1000)");
-			break;
-		case 0x06:
-			printf("TA-093 (PSP-3000)");
-			break;
-		//case 0x07:
-		//	printf("???");
-		//	break;
-		case 0x08:
-			printf("TA-095/095v2 (PSP-3000)");
-			break;
-		case 0x09:
-			printf("TA-096/097 (PSP-E1000)");
-			break;
-		case 0x10:
-			printf("IRS-002 (PCH-1000)");
-			break;
-		case 0x14:
-			printf("USS-1001 (PCH-2000)");
-			break;
-		default:
-			printf("UNKNOWN_%02X", key_buffer[key_offset+0x07]); // VTE-XXXX
-			break;
+		switch(key_buffer[key_offset+0x07])
+		{
+			case 0x01:
+				printf("TA-079/081 (PSP-1000)");
+				break;
+			case 0x02:
+				printf("TA-082/086 (PSP-1000)");
+				break;
+			case 0x03:
+				printf("TA-085/088 (PSP-2000)");
+				break;
+			case 0x04:
+				printf("TA-090v2/092 (PSP-3000)");
+				break;
+			case 0x05:
+				printf("TA-091 (PSP-N1000)");
+				break;
+			case 0x06:
+				printf("TA-093 (PSP-3000)");
+				break;
+			//case 0x07:
+			//	printf("???");
+			//	break;
+			case 0x08:
+				printf("TA-095/095v2 (PSP-3000)");
+				break;
+			case 0x09:
+				printf("TA-096/097 (PSP-E1000)");
+				break;
+			case 0x10:
+				printf("IRS-002 (PCH-1000)");
+				break;
+			case 0x14:
+				printf("USS-1001 (PCH-2000)");
+				break;
+			default:
+				printf("Unknown MoBo 0x%02X", key_buffer[key_offset+0x07]);
+				break;
+		}
 	}
+	else if (key_buffer[key_offset+0x06] == 0x02) // home system
+	{
+		switch(key_buffer[key_offset+0x07])
+		{
+			case 0x01:
+				printf("DOL-1001 (VTE-1000)");
+				break;
+			default:
+				printf("Unknown MoBo 0x%02X", key_buffer[key_offset+0x07]);
+				break;
+		}
+	}
+	else
+		printf("Unknown type 0x%02X", key_buffer[key_offset+0x06]);
 	printf("\n");
 
 	printf(" And your region is ");
@@ -180,12 +211,12 @@ int main(int argc, char*argv[])
 			printf("China");
 			break;
 		default:
-			printf("UNKNOWN_%02X", key_buffer[key_offset+0x05]);
+			printf("Unknown region 0x%02X", key_buffer[key_offset+0x05]);
 			break;
 	}
 	printf("\n\n");
 
-	printf(" IF YOU SEE ANY UNKNOWN VALUES PLZ CONTACT WITH ME\n");
+	printf(" https://github.com/Yoti/psp_idpsdump/\n");
 
 	// binary
 	for (i=key_offset; i<key_offset+0x10; i++)
@@ -195,9 +226,9 @@ int main(int argc, char*argv[])
 	// text
 	for (i=key_offset; i<key_offset+0x10; i++)
 	{
-		idps_text_char_temp[1]=key_buffer[i];
-		idps_text_char_1st[1]=(idps_text_char_temp[1] & 0xf0) >> 4;
-		idps_text_char_2nd[1]=(idps_text_char_temp[1] & 0x0f);
+		idps_text_char_tmp[1]=key_buffer[i];
+		idps_text_char_1st[1]=(idps_text_char_tmp[1] & 0xf0) >> 4;
+		idps_text_char_2nd[1]=(idps_text_char_tmp[1] & 0x0f);
 
 		// 1st half of byte
 		if (idps_text_char_1st[1] < 0xA) // digit
