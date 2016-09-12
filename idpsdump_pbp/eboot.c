@@ -4,7 +4,7 @@
 #include <pspctrl.h> // sceCtrl*()
 
 #define VER_MAJOR 0
-#define VER_MINOR 5
+#define VER_MINOR 6
 
 PSP_MODULE_INFO("idpsdump", 0, VER_MAJOR, VER_MINOR);
 PSP_MAIN_THREAD_ATTR(0);
@@ -17,10 +17,13 @@ PSP_HEAP_SIZE_KB(1024);
 #define key_offset 0x0038 // 100@38, 100@f0, 100@1a8, 101@60, 101@118
 
 /*
-	Model: Fat, SKU: PCH-1000, MoBo: IRS-002;
-	Model: Fat3G, SKU: PCH-1100, MoBo: IRS-002 (?);
+	Model: FatWF, SKU: PCH-1000, MoBo: IRS-002;
+	Model: Fat3G, SKU: PCH-1100, MoBo: IRS-002;
 	Model: Slim, SKU: PCH-2000, MoBo: USS-1001;
 	Model: TV, SKU: VTE-1000, MoBo: DOL-1001.
+
+	No diff between FatWF and Fat3G.
+	No diff between Vita TV (Asian) and PSTV (Western).
 */
 
 SceCtrlData pad;
@@ -102,10 +105,10 @@ int main(int argc, char*argv[])
 	printf(" It seems that you are using ");
 	if (key_buffer[key_offset+0x04] == 0x00)
 		printf("PlayStation Portable");
-	else if (key_buffer[key_offset+0x04] == 0x01) // psv, vtv
+	else if (key_buffer[key_offset+0x04] == 0x01) // psv, vtv/pstv
 	{
 		if (key_buffer[key_offset+0x06] == 0x00)
-			printf("PlayStation Vita"); // fat, fat3g, slim
+			printf("PlayStation Vita"); // fatWF/fat3G, slim
 		else if (key_buffer[key_offset+0x06] == 0x02)
 			printf("PlayStation/Vita TV"); // vtv, pstv
 		else
@@ -148,7 +151,7 @@ int main(int argc, char*argv[])
 				printf("TA-096/097 (PSP-E1000)");
 				break;
 			case 0x10:
-				printf("IRS-002 (PCH-1000)");
+				printf("IRS-002 (PCH-1000/1100)");
 				break;
 			case 0x14:
 				printf("USS-1001 (PCH-2000)");
