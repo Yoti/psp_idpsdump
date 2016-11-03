@@ -71,9 +71,9 @@ int main(int argc, char*argv[])
 	unsigned char idps_text_char_2nd[1];
 	char idps_text_buffer[32] = "";
 
-	sceKernelDelayThread(10000);
+	sceKernelDelayThread(1000000);
 	sceCtrlReadBufferPositive(&pad, 1);
-	sceKernelDelayThread(10000);
+	sceKernelDelayThread(1000000);
 	if (pad.Buttons & PSP_CTRL_LTRIGGER)
 		paranoid = 1;
 
@@ -91,18 +91,46 @@ int main(int argc, char*argv[])
 	if (paranoid == 1)
 	{
 		for (i=key_offset; i<key_offset+0x08; i++)
+		{
+			if (i == 0x04)
+				pspDebugScreenSetTextColor(0xFF0000FF);
+			else if (i == 0x06)
+				pspDebugScreenSetTextColor(0xFF0000FF);
+			else if (i == 0x07)
+				pspDebugScreenSetTextColor(0xFF00FF00);
+			else if (i == 0x05)
+				pspDebugScreenSetTextColor(0xFFFF0000);
+			else
+				pspDebugScreenSetTextColor(0xFFFFFFFF);
 			printf("%02X", (u8)key_buffer[i]);
+		}
 		for (i=key_offset; i<key_offset+0x08; i++)
+		{
+			pspDebugScreenSetTextColor(0xFFFFFFFF);
 			printf("XX");
+		}
 	}
 	else
 	{
 		for (i=key_offset; i<key_offset+0x10; i++)
+		{
+			if (i == 0x04)
+				pspDebugScreenSetTextColor(0xFF0000FF);
+			else if (i == 0x06)
+				pspDebugScreenSetTextColor(0xFF0000FF);
+			else if (i == 0x07)
+				pspDebugScreenSetTextColor(0xFF00FF00);
+			else if (i == 0x05)
+				pspDebugScreenSetTextColor(0xFFFF0000);
+			else
+				pspDebugScreenSetTextColor(0xFFFFFFFF);
 			printf("%02X", (u8)key_buffer[i]);
+		}
 	}
 	printf("\n\n");
 
 	printf(" It seems that you are using ");
+	pspDebugScreenSetTextColor(0xFF0000FF);
 	if (key_buffer[key_offset+0x04] == 0x00)
 		printf("PlayStation Portable");
 	else if (key_buffer[key_offset+0x04] == 0x01) // psv, vtv/pstv
@@ -116,9 +144,11 @@ int main(int argc, char*argv[])
 	}
 	else
 		printf("Unknown PS 0x%02X", key_buffer[key_offset+0x04]);
+	pspDebugScreenSetTextColor(0xFFFFFFFF);
 	printf("\n");
 
 	printf(" Your motherboard is ");
+	pspDebugScreenSetTextColor(0xFF00FF00);
 	if (key_buffer[key_offset+0x06] == 0x00) // portable
 	{
 		switch(key_buffer[key_offset+0x07])
@@ -175,9 +205,11 @@ int main(int argc, char*argv[])
 	}
 	else
 		printf("Unknown type 0x%02X", key_buffer[key_offset+0x06]);
+	pspDebugScreenSetTextColor(0xFFFFFFFF);
 	printf("\n");
 
 	printf(" And your region is ");
+	pspDebugScreenSetTextColor(0xFFFF0000);
 	switch(key_buffer[key_offset+0x05])
 	{
 		case 0x03:
@@ -217,6 +249,7 @@ int main(int argc, char*argv[])
 			printf("Unknown region 0x%02X", key_buffer[key_offset+0x05]);
 			break;
 	}
+	pspDebugScreenSetTextColor(0xFFFFFFFF);
 	printf("\n\n");
 
 	printf(" https://github.com/Yoti/psp_idpsdump/\n");
