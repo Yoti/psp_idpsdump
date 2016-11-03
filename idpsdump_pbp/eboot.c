@@ -79,7 +79,7 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("PSP IDPS Dumper v%i.%i by Yoti\n\n", VER_MAJOR, VER_MINOR);
+	printf("PSP IDPS Dumper v%i.%if by Yoti\n\n", VER_MAJOR, VER_MINOR);
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
@@ -92,13 +92,13 @@ int main(int argc, char*argv[])
 	{
 		for (i=key_offset; i<key_offset+0x08; i++)
 		{
-			if (i == 0x04)
+			if (i == key_offset+0x04)
 				pspDebugScreenSetTextColor(0xFF0000FF);
-			else if (i == 0x06)
+			else if (i == key_offset+0x06)
 				pspDebugScreenSetTextColor(0xFF0000FF);
-			else if (i == 0x07)
+			else if (i == key_offset+0x07)
 				pspDebugScreenSetTextColor(0xFF00FF00);
-			else if (i == 0x05)
+			else if (i == key_offset+0x05)
 				pspDebugScreenSetTextColor(0xFFFF0000);
 			else
 				pspDebugScreenSetTextColor(0xFFFFFFFF);
@@ -114,13 +114,13 @@ int main(int argc, char*argv[])
 	{
 		for (i=key_offset; i<key_offset+0x10; i++)
 		{
-			if (i == 0x04)
+			if (i+key_offset == key_offset+0x04)
 				pspDebugScreenSetTextColor(0xFF0000FF);
-			else if (i == 0x06)
+			else if (i == key_offset+0x06)
 				pspDebugScreenSetTextColor(0xFF0000FF);
-			else if (i == 0x07)
+			else if (i == key_offset+0x07)
 				pspDebugScreenSetTextColor(0xFF00FF00);
-			else if (i == 0x05)
+			else if (i == key_offset+0x05)
 				pspDebugScreenSetTextColor(0xFFFF0000);
 			else
 				pspDebugScreenSetTextColor(0xFFFFFFFF);
@@ -268,15 +268,15 @@ int main(int argc, char*argv[])
 
 		// 1st half of byte
 		if (idps_text_char_1st[1] < 0xA) // digit
-			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_1st[1]+0x30);
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_1st[1]+0x30);
 		else // char
-			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_1st[1]+0x37);
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_1st[1]+0x37);
 
 		// 2nd half of byte
 		if (idps_text_char_2nd[1] < 0xA) // digit
-			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_2nd[1]+0x30);
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_2nd[1]+0x30);
 		else // char
-			sprintf(idps_text_buffer, "%s%02X", idps_text_buffer, idps_text_char_2nd[1]+0x37);
+			sprintf(idps_text_buffer, "%s%c", idps_text_buffer, idps_text_char_2nd[1]+0x37);
 	}
 	WriteFile("ms0:/idps.txt", idps_text_buffer, 32);
 
