@@ -252,7 +252,7 @@ int main(int argc, char*argv[])
 	pspDebugScreenSetTextColor(0xFFFFFFFF);
 	printf("\n\n");
 
-	printf(" https://github.com/Yoti/psp_idpsdump/\n");
+	printf(" https://github.com/yoti/psp_idpsdump/\n");
 
 	// binary
 	for (i=key_offset; i<key_offset+0x10; i++)
