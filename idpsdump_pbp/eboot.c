@@ -79,7 +79,7 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("PSP IDPS Dumper v%i.%i by Yoti\n\n", VER_MAJOR, VER_MINOR);
+	printf("PSP IDPS Dumper v%i.%ia by Yoti\n\n", VER_MAJOR, VER_MINOR);
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
