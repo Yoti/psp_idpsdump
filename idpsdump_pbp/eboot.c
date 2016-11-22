@@ -5,6 +5,7 @@
 
 #define VER_MAJOR 0
 #define VER_MINOR 7
+#define VER_BUILD 'a'
 
 PSP_MODULE_INFO("idpsdump", 0, VER_MAJOR, VER_MINOR);
 PSP_MAIN_THREAD_ATTR(0);
@@ -79,7 +80,7 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("PSP IDPS Dumper v%i.%ia by Yoti\n\n", VER_MAJOR, VER_MINOR);
+	printf("PSP IDPS Dumper v%i.%i%c by Yoti\n\n", VER_MAJOR, VER_MINOR, VER_BUILD);
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
@@ -97,7 +98,7 @@ int main(int argc, char*argv[])
 			else if (i == key_offset+0x06)
 				pspDebugScreenSetTextColor(0xFF0000FF); // red
 			else if (i == key_offset+0x07)
-				pspDebugScreenSetTextColor(0xFF00FF00); // greem
+				pspDebugScreenSetTextColor(0xFF00FF00); // green
 			else if (i == key_offset+0x05)
 				pspDebugScreenSetTextColor(0xFFFF0000); // blue
 			else
@@ -106,8 +107,9 @@ int main(int argc, char*argv[])
 		}
 		for (i=key_offset; i<key_offset+0x08; i++) // 0x06???
 		{
-			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+			pspDebugScreenSetTextColor(0xFF777777); // gray
 			printf("XX");
+			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 		}
 	}
 	else
