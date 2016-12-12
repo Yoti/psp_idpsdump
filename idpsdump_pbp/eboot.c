@@ -198,6 +198,7 @@ int main(int argc, char*argv[])
 		switch(key_buffer[key_offset+0x07])
 		{
 			case 0x01:
+			case 0x02:
 				printf("DOL-1001 (VTE-1000)");
 				break;
 			default:
