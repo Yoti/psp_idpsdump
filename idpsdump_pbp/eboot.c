@@ -116,7 +116,7 @@ int main(int argc, char*argv[])
 	{
 		for (i=key_offset; i<key_offset+0x10; i++)
 		{
-			if (i+key_offset == key_offset+0x04)
+			if (i == key_offset+0x04)
 				pspDebugScreenSetTextColor(0xFF0000FF); // red
 			else if (i == key_offset+0x06)
 				pspDebugScreenSetTextColor(0xFF0000FF); // red
