@@ -1,6 +1,10 @@
 # psp_idpsdump
 PSP IDPS Dumper
 
+v0.7 [PSP/PSV]
+- nice look
+- some new info from psvident by freakler
+
 v0.6f [PSP/PSV]
 - proper dumping for psp and vita
 - proper coloring for psp
