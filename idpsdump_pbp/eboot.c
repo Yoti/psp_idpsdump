@@ -4,8 +4,11 @@
 #include <pspctrl.h> // sceCtrl*()
 
 #define VER_MAJOR 0
-#define VER_MINOR 7
-#define VER_BUILD 'a'
+#define VER_MINOR 8
+#define VER_BUILD "a1"
+
+#define VAL_PUBLIC 0x08 // 0x0A
+#define VAL_PRIVATE 0x08 // 0x06
 
 PSP_MODULE_INFO("idpsdump", 0, VER_MAJOR, VER_MINOR);
 PSP_MAIN_THREAD_ATTR(0);
@@ -18,6 +21,7 @@ PSP_HEAP_SIZE_KB(1024);
 #define key_offset 0x0038 // 100@38, 100@f0, 100@1a8, 101@60, 101@118
 
 /*
+	Model: Proto, SKU: DEM-3000X, MoBo: IRT-001;
 	Model: FatWF, SKU: PCH-1000, MoBo: IRS-002;
 	Model: Fat3G, SKU: PCH-1100, MoBo: IRS-002;
 	Model: Slim, SKU: PCH-2000, MoBo: USS-1001;
@@ -80,8 +84,10 @@ int main(int argc, char*argv[])
 
 	pspDebugScreenInit();
 	pspDebugScreenClear(); // особо не нужно
-	printf("PSP IDPS Dumper v%i.%i by Yoti\n\n", VER_MAJOR, VER_MINOR);
-	//printf("PSP IDPS Dumper v%i.%i%c by Yoti\n\n", VER_MAJOR, VER_MINOR, VER_BUILD);
+	printf("PSP IDPS Dumper v%i.%i%s by Yoti\n\n", VER_MAJOR, VER_MINOR, VER_BUILD);
+
+	if (VAL_PUBLIC + VAL_PRIVATE != 0x10)
+		ExitError("Length error 0x%02x", 5, VAL_PUBLIC + VAL_PRIVATE);
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
 	if (mod < 0)
@@ -90,6 +96,40 @@ int main(int argc, char*argv[])
 	ReadKey(key_number, key_buffer);
 
 	printf(" Your IDPS is: ");
+	for (i=0; i<VAL_PUBLIC; i++)
+	{
+		if (i == 0x04)
+			pspDebugScreenSetTextColor(0xFF0000FF); // red
+		else if (i == 0x06)
+			pspDebugScreenSetTextColor(0xFF0000FF); // red
+		else if (i == 0x07)
+			pspDebugScreenSetTextColor(0xFF00FF00); // green
+		else if (i == 0x05)
+			pspDebugScreenSetTextColor(0xFFFF0000); // blue
+		else
+			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+		printf("%02X", (u8)idps_buffer[key_offset+i]);
+	}
+	if (paranoid == 1)
+	{
+		pspDebugScreenSetTextColor(0xFF777777); // gray
+		for (i=VAL_PUBLIC; i<VAL_PUBLIC+VAL_PRIVATE; i++)
+		{
+			printf("XX");
+		}
+		pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+	}
+	else // if (paranoid == 0)
+	{
+		pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+		for (i=VAL_PUBLIC; i<VAL_PUBLIC+VAL_PRIVATE; i++)
+		{
+			printf("%02X", (u8)idps_buffer[key_offset+i]);
+		}
+	}
+	printf("\n\n");
+
+	// ---------------------------------------------------------
 	if (paranoid == 1)
 	{
 		for (i=key_offset; i<key_offset+0x08; i++) // 0x0A???
@@ -131,6 +171,7 @@ int main(int argc, char*argv[])
 		}
 	}
 	printf("\n\n");
+	// ---------------------------------------------------------
 
 	printf(" It seems that you are using ");
 	pspDebugScreenSetTextColor(0xFF0000FF); // red
