@@ -5,10 +5,10 @@
 
 #define VER_MAJOR 0
 #define VER_MINOR 8
-#define VER_BUILD "a1"
+#define VER_BUILD ""
 
-#define VAL_PUBLIC 0x08 // 0x0A
-#define VAL_PRIVATE 0x08 // 0x06
+#define VAL_PUBLIC 0x0A
+#define VAL_PRIVATE 0x06
 
 PSP_MODULE_INFO("idpsdump", 0, VER_MAJOR, VER_MINOR);
 PSP_MAIN_THREAD_ATTR(0);
@@ -21,11 +21,11 @@ PSP_HEAP_SIZE_KB(1024);
 #define key_offset 0x0038 // 100@38, 100@f0, 100@1a8, 101@60, 101@118
 
 /*
-	Model: Proto, SKU: DEM-3000X, MoBo: IRT-001;
-	Model: FatWF, SKU: PCH-1000, MoBo: IRS-002;
-	Model: Fat3G, SKU: PCH-1100, MoBo: IRS-002;
-	Model: Slim, SKU: PCH-2000, MoBo: USS-1001;
-	Model: TV, SKU: VTE-1000, MoBo: DOL-1001.
+	Model: Proto, SKU: DEM-3000, MoBo: IRT-001/IRT-002;
+	Model: FatWF, SKU: PCH-1000, MoBo: IRS-002/IRS-1001;
+	Model: Fat3G, SKU: PCH-1100, MoBo: IRS-002/IRS-1001;
+	Model: Slim, SKU: PCH-2000, MoBo: USS-1001/USS-1002;
+	Model: TV, SKU: VTE-1000, MoBo: DOL-1001/DOL-1002.
 
 	No diff between FatWF and Fat3G.
 	No diff between Vita TV (Asian) and PSTV (Western).
@@ -216,7 +216,7 @@ int main(int argc, char*argv[])
 				printf("TA-093 (PSP-3000)");
 				break;
 			//case 0x07:
-			//	printf("???");
+			//	printf("TA-094 (PSP-N1000)");
 			//	break;
 			case 0x08:
 				printf("TA-095 (PSP-3000)");
@@ -227,8 +227,15 @@ int main(int argc, char*argv[])
 			case 0x10:
 				printf("IRS-002 (PCH-1000/1100)");
 				break;
+			case 0x11: // 3G?
+			case 0x12: // WF?
+				printf("IRS-1001 (PCH-1000/1100)");
+				break;
 			case 0x14:
 				printf("USS-1001 (PCH-2000)");
+				break;
+			case 0x18:
+				printf("USS-1002 (PCH-2000)");
 				break;
 			default:
 				printf("Unknown MoBo 0x%02X", key_buffer[key_offset+0x07]);
@@ -240,8 +247,10 @@ int main(int argc, char*argv[])
 		switch(key_buffer[key_offset+0x07])
 		{
 			case 0x01:
-			case 0x02:
 				printf("DOL-1001 (VTE-1000)");
+				break;
+			case 0x02:
+				printf("DOL-1002 (VTE-1000)");
 				break;
 			default:
 				printf("Unknown MoBo 0x%02X", key_buffer[key_offset+0x07]);
