@@ -1,5 +1,8 @@
 # psp_idpsdump
-PSP IDPS Dumper
+PSP IDPS Dumper (GPLv3)
+
+v0.8 [PSP/PSV]
+- some new info from wiki by celesteblue
 
 v0.7 [PSP/PSV]
 - nice look
