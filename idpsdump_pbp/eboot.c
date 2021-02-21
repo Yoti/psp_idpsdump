@@ -7,6 +7,7 @@
 #define VER_MINOR 8
 #define VER_BUILD ""
 
+#define VAL_LENGTH 0x10
 #define VAL_PUBLIC 0x0A
 #define VAL_PRIVATE 0x06
 
@@ -86,7 +87,7 @@ int main(int argc, char*argv[])
 	pspDebugScreenClear(); // особо не нужно
 	printf("PSP IDPS Dumper v%i.%i%s by Yoti\n\n", VER_MAJOR, VER_MINOR, VER_BUILD);
 
-	if (VAL_PUBLIC + VAL_PRIVATE != 0x10)
+	if (VAL_PUBLIC + VAL_PRIVATE != VAL_LENGTH)
 		ExitError("Length error 0x%02x", 5, VAL_PUBLIC + VAL_PRIVATE);
 
 	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
@@ -96,43 +97,9 @@ int main(int argc, char*argv[])
 	ReadKey(key_number, key_buffer);
 
 	printf(" Your IDPS is: ");
-	for (i=0; i<VAL_PUBLIC; i++)
-	{
-		if (i == 0x04)
-			pspDebugScreenSetTextColor(0xFF0000FF); // red
-		else if (i == 0x06)
-			pspDebugScreenSetTextColor(0xFF0000FF); // red
-		else if (i == 0x07)
-			pspDebugScreenSetTextColor(0xFF00FF00); // green
-		else if (i == 0x05)
-			pspDebugScreenSetTextColor(0xFFFF0000); // blue
-		else
-			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
-		printf("%02X", (u8)idps_buffer[key_offset+i]);
-	}
 	if (paranoid == 1)
 	{
-		pspDebugScreenSetTextColor(0xFF777777); // gray
-		for (i=VAL_PUBLIC; i<VAL_PUBLIC+VAL_PRIVATE; i++)
-		{
-			printf("XX");
-		}
-		pspDebugScreenSetTextColor(0xFFFFFFFF); // white
-	}
-	else // if (paranoid == 0)
-	{
-		pspDebugScreenSetTextColor(0xFFFFFFFF); // white
-		for (i=VAL_PUBLIC; i<VAL_PUBLIC+VAL_PRIVATE; i++)
-		{
-			printf("%02X", (u8)idps_buffer[key_offset+i]);
-		}
-	}
-	printf("\n\n");
-
-	// ---------------------------------------------------------
-	if (paranoid == 1)
-	{
-		for (i=key_offset; i<key_offset+0x08; i++) // 0x0A???
+		for (i=key_offset; i<key_offset+VAL_PUBLIC; i++)
 		{
 			if (i == key_offset+0x04)
 				pspDebugScreenSetTextColor(0xFF0000FF); // red
@@ -146,7 +113,7 @@ int main(int argc, char*argv[])
 				pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 			printf("%02X", (u8)key_buffer[i]);
 		}
-		for (i=key_offset; i<key_offset+0x08; i++) // 0x06???
+		for (i=key_offset; i<key_offset+VAL_PRIVATE; i++)
 		{
 			pspDebugScreenSetTextColor(0xFF777777); // gray
 			printf("XX");
@@ -155,7 +122,7 @@ int main(int argc, char*argv[])
 	}
 	else
 	{
-		for (i=key_offset; i<key_offset+0x10; i++)
+		for (i=key_offset; i<key_offset+VAL_LENGTH; i++)
 		{
 			if (i == key_offset+0x04)
 				pspDebugScreenSetTextColor(0xFF0000FF); // red
@@ -171,7 +138,6 @@ int main(int argc, char*argv[])
 		}
 	}
 	printf("\n\n");
-	// ---------------------------------------------------------
 
 	printf(" It seems that you are using ");
 	pspDebugScreenSetTextColor(0xFF0000FF); // red
