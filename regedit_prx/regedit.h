@@ -1,6 +1,3 @@
-int NewKey(int key);
-int ReadKey(int key, char*buf);
-int WriteKey(int key, char*buf);
-int DeleteKey(int key);
-
-u32 Scramble(void);
+int prxIdStorageLookup(u16 key, u32 offset, void *buf, u32 len);
+int prxIdStorageReadLeaf(u16 key, void *buf);
+int prxIdStorageWriteLeaf(u16 key, void *buf);

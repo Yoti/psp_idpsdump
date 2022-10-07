@@ -70,7 +70,6 @@ int main(int argc, char*argv[])
 {
 	int i = 0;
 	int paranoid = 0;
-	char key_buffer[512];
 	char idps_buffer[16];
 	unsigned char idps_text_char_tmp[1];
 	unsigned char idps_text_char_1st[1];
@@ -94,76 +93,61 @@ int main(int argc, char*argv[])
 	if (mod < 0)
 		ExitError("Error: LoadStart() returned 0x%08x\n", 3, mod);
 
-	ReadKey(key_number, key_buffer);
+	prxIdStorageLookup(key_number, key_offset, idps_buffer, sizeof(idps_buffer));
 
 	printf(" Your IDPS is: ");
-	if (paranoid == 1)
-	{
-		for (i=key_offset; i<key_offset+VAL_PUBLIC; i++)
-		{
-			if (i == key_offset+0x04)
-				pspDebugScreenSetTextColor(0xFF0000FF); // red #1
-			else if (i == key_offset+0x05)
-				pspDebugScreenSetTextColor(0xFFFF0000); // blue #2
-			else if (i == key_offset+0x06)
-				pspDebugScreenSetTextColor(0xFF0000FF); // red #3
-			else if (i == key_offset+0x07)
-				pspDebugScreenSetTextColor(0xFF00FF00); // green #4
-			else
-				pspDebugScreenSetTextColor(0xFFFFFFFF); // white
-			printf("%02X", (u8)key_buffer[i]);
-		}
-		for (i=key_offset; i<key_offset+VAL_PRIVATE; i++)
-		{
+	for (i=0; i<VAL_PUBLIC; i++) {
+		if (i == 0x04)
+			pspDebugScreenSetTextColor(0xFF0000FF); // red #1
+		else if (i == 0x05)
+			pspDebugScreenSetTextColor(0xFFFF0000); // blue #2
+		else if (i == 0x06)
+			pspDebugScreenSetTextColor(0xFF0000FF); // red #3
+		else if (i == 0x07)
+			pspDebugScreenSetTextColor(0xFF00FF00); // green #4
+		else
+			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+		printf("%02X", (u8)idps_buffer[i]);
+	}
+	if (paranoid == 1) {
+		for (i=0; i<VAL_PRIVATE; i++) {
 			pspDebugScreenSetTextColor(0xFF777777); // gray
 			printf("XX");
 			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 		}
-	}
-	else
-	{
-		for (i=key_offset; i<key_offset+VAL_LENGTH; i++)
-		{
-			if (i == key_offset+0x04)
-				pspDebugScreenSetTextColor(0xFF0000FF); // red
-			else if (i == key_offset+0x06)
-				pspDebugScreenSetTextColor(0xFF0000FF); // red
-			else if (i == key_offset+0x07)
-				pspDebugScreenSetTextColor(0xFF00FF00); // green
-			else if (i == key_offset+0x05)
-				pspDebugScreenSetTextColor(0xFFFF0000); // blue
-			else
-				pspDebugScreenSetTextColor(0xFFFFFFFF); // white
-			printf("%02X", (u8)key_buffer[i]);
+	} else {
+		for (i=0; i<VAL_PRIVATE; i++) {
+			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+			printf("%02X", (u8)idps_buffer[VAL_PUBLIC+i]);
 		}
 	}
 	printf("\n\n");
 
 	printf(" It seems that you are using ");
 	pspDebugScreenSetTextColor(0xFF0000FF); // red
-	if (key_buffer[key_offset+0x04] == 0x00)
+	if (idps_buffer[0x04] == 0x00)
 		printf("PlayStation Portable");
-	else if (key_buffer[key_offset+0x04] == 0x01) // psv, vtv/pstv
+	else if (idps_buffer[0x04] == 0x01) // psv, vtv/pstv
 	{
-		if (key_buffer[key_offset+0x06] == 0x00)
+		if (idps_buffer[0x06] == 0x00)
 			printf("PlayStation Vita"); // fatWF/fat3G, slim
-		else if (key_buffer[key_offset+0x06] == 0x02)
+		else if (idps_buffer[0x06] == 0x02)
 			printf("PlayStation/Vita TV"); // vtv, pstv
-		else if (key_buffer[key_offset+0x06] == 0x06)
+		else if (idps_buffer[0x06] == 0x06)
 			printf("PlayStation/Vita TV"); // vtv, pstv (testkit)
 		else
-			printf("Unknown Vita 0x%02X", key_buffer[key_offset+0x06]);
+			printf("Unknown Vita 0x%02X", idps_buffer[0x06]);
 	}
 	else
-		printf("Unknown PS 0x%02X", key_buffer[key_offset+0x04]);
+		printf("Unknown PS 0x%02X", idps_buffer[0x04]);
 	pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 	printf("\n");
 
 	printf(" Your motherboard is ");
 	pspDebugScreenSetTextColor(0xFF00FF00); // green
-	if (key_buffer[key_offset+0x06] == 0x00) // portable
+	if (idps_buffer[0x06] == 0x00) // portable
 	{
-		switch(key_buffer[key_offset+0x07])
+		switch(idps_buffer[0x07])
 		{
 			case 0x01:
 				printf("TA-079/081 (PSP-1000)");
@@ -206,13 +190,13 @@ int main(int argc, char*argv[])
 				printf("USS-1002 (PCH-2000)");
 				break;
 			default:
-				printf("Unknown MoBo 0x%02X", key_buffer[key_offset+0x07]);
+				printf("Unknown MoBo 0x%02X", idps_buffer[0x07]);
 				break;
 		}
 	}
-	else if ((key_buffer[key_offset+0x06] == 0x02) || (key_buffer[key_offset+0x06] == 0x06)) // home system
+	else if ((idps_buffer[0x06] == 0x02) || (idps_buffer[0x06] == 0x06)) // home system
 	{
-		switch(key_buffer[key_offset+0x07])
+		switch(idps_buffer[0x07])
 		{
 			case 0x01:
 				printf("DOL-1001 (VTE-1000)");
@@ -221,18 +205,18 @@ int main(int argc, char*argv[])
 				printf("DOL-1002 (VTE-1000)");
 				break;
 			default:
-				printf("Unknown MoBo 0x%02X", key_buffer[key_offset+0x07]);
+				printf("Unknown MoBo 0x%02X", idps_buffer[0x07]);
 				break;
 		}
 	}
 	else
-		printf("Unknown type 0x%02X", key_buffer[key_offset+0x06]);
+		printf("Unknown type 0x%02X", idps_buffer[0x06]);
 	pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 	printf("\n");
 
 	printf(" And your region is ");
 	pspDebugScreenSetTextColor(0xFFFF0000); // blue
-	switch(key_buffer[key_offset+0x05])
+	switch(idps_buffer[0x05])
 	{
 		case 0x00:
 			printf("Proto");
@@ -277,15 +261,13 @@ int main(int argc, char*argv[])
 			printf("China");
 			break;
 		default:
-			printf("Unknown region 0x%02X", key_buffer[key_offset+0x05]);
+			printf("Unknown region 0x%02X", idps_buffer[0x05]);
 			break;
 	}
 	pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 	printf("\n\n");
 
 	// binary
-	for (i=key_offset; i<key_offset+0x10; i++)
-		idps_buffer[i-key_offset]=key_buffer[i];
 	printf(" Saving as ms0:/idps.bin... ");
 	if (WriteFile("ms0:/idps.bin", idps_buffer, 16) > 0)
 		printf("OK");
@@ -294,9 +276,9 @@ int main(int argc, char*argv[])
 	printf("\n");
 
 	// text
-	for (i=key_offset; i<key_offset+0x10; i++)
+	for (i=0; i<0x10; i++)
 	{
-		idps_text_char_tmp[1]=key_buffer[i];
+		idps_text_char_tmp[1]=idps_buffer[i];
 		idps_text_char_1st[1]=(idps_text_char_tmp[1] & 0xf0) >> 4;
 		idps_text_char_2nd[1]=(idps_text_char_tmp[1] & 0x0f);
 
