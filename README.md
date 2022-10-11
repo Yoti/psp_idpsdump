@@ -1,6 +1,10 @@
 # psp_idpsdump
 PSP IDPS Dumper (GPLv3)
 
+v0.9 [PSP/PSV]
+- psv proto/devkit/testkit detection
+- pstv testkit proper detection
+
 v0.8 [PSP/PSV]
 - some new info from wiki by celesteblue
 
