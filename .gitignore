@@ -30,8 +30,11 @@
 
 # Debug files
 *.dSYM/
-*.bat
 
 # Sony PlayStation Portable
 *.pbp
 *.prx
+
+# Archives
+*.7z
+*.zip

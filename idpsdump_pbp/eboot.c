@@ -3,8 +3,8 @@
 #include <stdio.h> // sprintf()
 #include <pspctrl.h> // sceCtrl*()
 
-#define VER_MAJOR 0
-#define VER_MINOR 9
+#define VER_MAJOR 1
+#define VER_MINOR 0
 #define VER_BUILD ""
 
 #define VAL_LENGTH 0x10
@@ -34,11 +34,9 @@ PSP_HEAP_SIZE_KB(1024);
 
 SceCtrlData pad;
 
-void ExitCross(char*text)
-{
+void ExitCross(char*text) {
 	printf("%s, press X to exit...\n", text);
-	do
-	{
+	do {
 		sceCtrlReadBufferPositive(&pad, 1);
 		sceKernelDelayThread(0.05*1000*1000);
 	}
@@ -46,15 +44,13 @@ void ExitCross(char*text)
 	sceKernelExitGame();
 }
 
-void ExitError(char*text, int delay, int error)
-{
+void ExitError(char*text, int delay, int error) {
 	printf(text, error);
 	sceKernelDelayThread(delay*1000*1000);
 	sceKernelExitGame();
 }
 
-int WriteFile(char*file, void*buf, int size)
-{
+int WriteFile(char*file, void*buf, int size) {
 	sceIoRemove(file);
 	SceUID fd = sceIoOpen(file, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
 	if (fd < 0)
@@ -66,8 +62,7 @@ int WriteFile(char*file, void*buf, int size)
 	return written;
 }
 
-int main(int argc, char*argv[])
-{
+int main(int argc, char*argv[]) {
 	int i = 0;
 	int paranoid = 0;
 	char idps_buffer[16];
@@ -105,6 +100,8 @@ int main(int argc, char*argv[])
 			pspDebugScreenSetTextColor(0xFF0000FF); // red #3
 		else if (i == 0x07)
 			pspDebugScreenSetTextColor(0xFF00FF00); // green #4
+		else if (i == 0x08)
+			pspDebugScreenSetTextColor(0xFF007FFF); // orange #5
 		else
 			pspDebugScreenSetTextColor(0xFFFFFFFF); // white
 		printf("%02X", (u8)idps_buffer[i]);
@@ -127,8 +124,7 @@ int main(int argc, char*argv[])
 	pspDebugScreenSetTextColor(0xFF0000FF); // red
 	if (idps_buffer[0x04] == 0x00)
 		printf("PlayStation Portable");
-	else if (idps_buffer[0x04] == 0x01) // psv, vtv/pstv
-	{
+	else if (idps_buffer[0x04] == 0x01) { // psv, vtv/pstv
 		if (idps_buffer[0x06] == 0x00)
 			printf("PlayStation Vita"); // fatWF/fat3G, slim
 		else if (idps_buffer[0x06] == 0x02)
@@ -145,10 +141,8 @@ int main(int argc, char*argv[])
 
 	printf(" Your motherboard is ");
 	pspDebugScreenSetTextColor(0xFF00FF00); // green
-	if (idps_buffer[0x06] == 0x00) // portable
-	{
-		switch(idps_buffer[0x07])
-		{
+	if (idps_buffer[0x06] == 0x00) { // portable
+		switch(idps_buffer[0x07]) {
 			case 0x01:
 				printf("TA-079/081 (PSP-1000)");
 				break;
@@ -193,11 +187,8 @@ int main(int argc, char*argv[])
 				printf("Unknown MoBo 0x%02X", idps_buffer[0x07]);
 				break;
 		}
-	}
-	else if ((idps_buffer[0x06] == 0x02) || (idps_buffer[0x06] == 0x06)) // home system
-	{
-		switch(idps_buffer[0x07])
-		{
+	} else if ((idps_buffer[0x06] == 0x02) || (idps_buffer[0x06] == 0x06)) { // home system
+		switch(idps_buffer[0x07]) {
 			case 0x01:
 				printf("DOL-1001 (VTE-1000)");
 				break;
@@ -208,16 +199,20 @@ int main(int argc, char*argv[])
 				printf("Unknown MoBo 0x%02X", idps_buffer[0x07]);
 				break;
 		}
-	}
-	else
+	} else
 		printf("Unknown type 0x%02X", idps_buffer[0x06]);
+	pspDebugScreenSetTextColor(0xFF007FFF); // orange
+	if ((u8)idps_buffer[0x08] == 0x8C)
+		printf(" [QAF]");
+	else
+		printf(" [non-QAF]");
 	pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+	//printf(" [Product Sub Code]");
 	printf("\n");
 
 	printf(" And your region is ");
 	pspDebugScreenSetTextColor(0xFFFF0000); // blue
-	switch(idps_buffer[0x05])
-	{
+	switch(idps_buffer[0x05]) {
 		case 0x00:
 			printf("Proto");
 			break;
@@ -228,43 +223,44 @@ int main(int argc, char*argv[])
 			printf("TestKit");
 			break;
 		case 0x03:
-			printf("Japan");
+			printf("Japan 00");
 			break;
 		case 0x04:
-			printf("North America");
+			printf("North America 01");
 			break;
 		case 0x05:
-			printf("Europe/East/Africa");
+			printf("Europe/East/Africa 04");
 			break;
 		case 0x06:
-			printf("Korea");
+			printf("Korea 05");
 			break;
-		case 0x07: // PCH-xx03 VTE-1016
-			printf("Great Britain/United Kingdom");
+		case 0x07:
+			printf("Great Britain/United Kingdom 03");
 			break;
 		case 0x08:
-			printf("Mexica/Latin America");
+			printf("Mexica/Latin America 10");
 			break;
 		case 0x09:
-			printf("Australia/New Zeland");
+			printf("Australia/New Zeland 02");
 			break;
 		case 0x0A:
-			printf("Hong Kong/Singapore");
+			printf("Hong Kong/Singapore 06");
 			break;
 		case 0x0B:
-			printf("Taiwan");
+			printf("Taiwan 07");
 			break;
 		case 0x0C:
-			printf("Russia");
+			printf("Russia 08");
 			break;
 		case 0x0D:
-			printf("China");
+			printf("China 09");
 			break;
 		default:
 			printf("Unknown region 0x%02X", idps_buffer[0x05]);
 			break;
 	}
 	pspDebugScreenSetTextColor(0xFFFFFFFF); // white
+	//printf(" [Product Code]");
 	printf("\n\n");
 
 	// binary
@@ -276,8 +272,7 @@ int main(int argc, char*argv[])
 	printf("\n");
 
 	// text
-	for (i=0; i<0x10; i++)
-	{
+	for (i=0; i<0x10; i++) {
 		idps_text_char_tmp[1]=idps_buffer[i];
 		idps_text_char_1st[1]=(idps_text_char_tmp[1] & 0xf0) >> 4;
 		idps_text_char_2nd[1]=(idps_text_char_tmp[1] & 0x0f);
