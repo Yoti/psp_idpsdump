@@ -1,10 +1,12 @@
 #include <pspsdk.h>
 #include <pspkernel.h>
+#include <pspidstorage.h>
 #include <stdio.h> // sprintf()
 #include <pspctrl.h> // sceCtrl*()
+#include "libpspexploit.h"
 
 #define VER_MAJOR 1
-#define VER_MINOR 0
+#define VER_MINOR 2
 #define VER_BUILD ""
 
 #define VAL_LENGTH 0x10
@@ -15,7 +17,6 @@ PSP_MODULE_INFO("idpsdump", 0, VER_MAJOR, VER_MINOR);
 PSP_MAIN_THREAD_ATTR(0);
 PSP_HEAP_SIZE_KB(1024);
 
-#include "../regedit_prx/regedit.h"
 #define printf pspDebugScreenPrintf
 
 #define key_number 0x0100 // 100/120, 101/121
@@ -33,6 +34,14 @@ PSP_HEAP_SIZE_KB(1024);
 */
 
 SceCtrlData pad;
+
+static KernelFunctions _ktbl; KernelFunctions* k_tbl = &_ktbl;
+int (*_sceIdStorageReadLeaf)(int, void*) = NULL;
+int (*_sceIdStorageCreateLeaf)(int) = NULL;
+int (*_sceIdStorageWriteLeaf)(int, void*) = NULL;
+int (*_sceIdStorageLookup)(int, int, void*, int) = NULL;
+int (*_sceIdStorageFlush)(void) = NULL;
+char idps_buffer[16];
 
 void ExitCross(char*text) {
 	printf("%s, press X to exit...\n", text);
@@ -62,10 +71,54 @@ int WriteFile(char*file, void*buf, int size) {
 	return written;
 }
 
+int prxIdStorageLookup(u16 key, u32 offset, void *buf, u32 len) {
+	memset(buf, 0, len);
+	int ret = _sceIdStorageLookup(key, offset, buf, len);
+	return ret;
+}
+
+/*
+ * DO NOT ENABLE it will fuck ya shit up!
+ * int prxIdStorageWriteLeaf(u16 key, void *buf) {
+	char tmp[512];
+	int ret = _sceIdStorageReadLeaf(key, tmp);
+	if (ret < 1)
+		_sceIdStorageCreateLeaf(key);
+	ret = _sceIdStorageWriteLeaf(key, buf);
+	_sceIdStorageFlush();
+	return ret;
+}
+*/
+
+void elevatePrivs() {
+
+	int k1 = pspSdkSetK1(0);
+	int userLevel = pspXploitSetUserLevel(8);
+	pspXploitRepairKernel();
+	pspXploitScanKernelFunctions(k_tbl);
+
+
+	_sceIdStorageReadLeaf = pspXploitFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0xEB00C509);
+	_sceIdStorageCreateLeaf = pspXploitFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x08A471A6);
+	_sceIdStorageWriteLeaf = pspXploitFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x1FA4D135);
+	_sceIdStorageLookup = pspXploitFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x6FE062D1);
+	_sceIdStorageFlush = pspXploitFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x3AD32523);
+
+	
+	//if(prxIdStorageWriteLeaf(key_number, idps_buffer)<0)
+		//printf("WriteLeaf Failed!\n");
+
+	if(prxIdStorageLookup(key_number, key_offset, idps_buffer, sizeof(idps_buffer))<0)
+		printf("Lookup Failed!\n");
+
+	pspSdkSetK1(k1);
+	pspXploitSetUserLevel(userLevel);
+
+}
+
 int main(int argc, char*argv[]) {
 	int i = 0;
 	int paranoid = 0;
-	char idps_buffer[16];
 	unsigned char idps_text_char_tmp[1];
 	unsigned char idps_text_char_1st[1];
 	unsigned char idps_text_char_2nd[1];
@@ -84,11 +137,13 @@ int main(int argc, char*argv[]) {
 	if (VAL_PUBLIC + VAL_PRIVATE != VAL_LENGTH)
 		ExitError("Length error 0x%02x", 5, VAL_PUBLIC + VAL_PRIVATE);
 
-	SceUID mod = pspSdkLoadStartModule("regedit.prx", PSP_MEMORY_PARTITION_KERNEL);
-	if (mod < 0)
-		ExitError("Error: LoadStart() returned 0x%08x\n", 3, mod);
-
-	prxIdStorageLookup(key_number, key_offset, idps_buffer, sizeof(idps_buffer));
+	int res = pspXploitInitKernelExploit();
+	if(res == 0) 
+		res = pspXploitDoKernelExploit();
+		if(res == 0) 
+			pspXploitExecuteKernel(elevatePrivs);
+		else
+			ExitError("Can't exploit function", 5, 1);
 
 	printf(" Your IDPS is: ");
 	for (i=0; i<VAL_PUBLIC; i++) {
