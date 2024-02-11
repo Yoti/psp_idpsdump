@@ -1,6 +1,9 @@
 # psp_idpsdump
 PSP IDPS Dumper (GPLv3)
 
+v1.1 [PSP/PSV]
+- psp go 06g ta-094 (strider2) detection
+
 v1.0 [PSP/PSV]
 - psp qaf detection
 - regions also has their retail codes
